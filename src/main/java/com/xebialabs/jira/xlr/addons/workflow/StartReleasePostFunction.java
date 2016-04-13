@@ -21,6 +21,7 @@ import com.xebialabs.jira.xlr.client.XLReleaseClient;
 import com.xebialabs.jira.xlr.client.XLReleaseClientException;
 import com.xebialabs.jira.xlr.dto.Release;
 import com.xebialabs.jira.xlr.dto.TemplateVariable;
+import com.xebialabs.jira.xlr.dto.TemplateVariableV2;
 
 import static com.xebialabs.jira.xlr.addons.workflow.FieldConstants.XLR_PASSWORD_FIELD;
 import static com.xebialabs.jira.xlr.addons.workflow.FieldConstants.XLR_PASSWORD_GLOBAL;
@@ -81,7 +82,15 @@ public class StartReleasePostFunction extends AbstractJiraFunctionProvider
 
         String xlrTemplate = argsMapper.getReleaseTemplateName();
         Release releaseTemplate = xlReleaseClient.findTemplateByTitle(xlrTemplate);
-        List<TemplateVariable> variables = xlReleaseClient.getVariables(releaseTemplate.getPublicId(serverVersion));
+
+        List variables;
+
+        if (serverVersion.substring(0,3).equals("4.6") || serverVersion.substring(0,3).equals("4.7") ) {
+            variables = xlReleaseClient.getVariables(releaseTemplate.getPublicId(serverVersion));
+        } else {
+            variables =  xlReleaseClient.getVariablesV2(releaseTemplate.getPublicId(serverVersion));
+        }
+
         argsMapper.populateVariables(variables, serverVersion);
 
         String title = argsMapper.getOptionalCustomFieldValue(XLR_RELEASE_TITLE_FIELD);
